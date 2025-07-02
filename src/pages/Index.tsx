@@ -61,7 +61,7 @@ const Index = () => {
         </div> */}
         <Button
           onClick={handleStart}
-          className="bg-green-400 hover:bg-green-500 text-black rounded-full w-32 h-32 text-2xl font-medium"
+          className="bg-green-400 hover:bg-green-500 text-black rounded-full w-64 h-64 text-5xl font-bold"
         >
           ANALYSE
         </Button>
