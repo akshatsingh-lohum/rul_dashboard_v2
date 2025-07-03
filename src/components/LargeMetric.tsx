@@ -39,22 +39,21 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
     return `${Math.round(numericSize * METRIC_SIZE_MULTIPLIER)}px`;
   };
 
-  // For the specific labels we want to make bigger (SoH, RUL, OCV)
-  const isSpecialLabel = label.startsWith("RUL") || label.startsWith("OCV");
+  // Special handling for SoH to match RUL
+  const isRUL = label.startsWith("RUL");
   const isSoH = label.startsWith("SoH");
+  const isOCV = label.startsWith("OCV");
   
-  // For SoH, both label and value should be large
-  const labelSize = isSoH 
-    ? getFontSize(baseFontSizes[size].value) // Use the value size for SoH label
-    : isSpecialLabel 
-      ? `${Math.round(48 * METRIC_SIZE_MULTIPLIER)}px`
-      : getFontSize(baseFontSizes[size].label);
+  // For SoH and RUL, use the same sizes
+  const isSpecialLabel = isRUL || isOCV || isSoH;
   
-  // Value size - use the same size as label for SoH
-  const valueSize = isSoH 
-    ? labelSize 
-    : getFontSize(baseFontSizes[size].value);
-    
+  // Use the same size calculation for SoH and RUL
+  const labelSize = isSpecialLabel 
+    ? `${Math.round(48 * METRIC_SIZE_MULTIPLIER)}px`
+    : getFontSize(baseFontSizes[size].label);
+  
+  // Standard value size for all metrics
+  const valueSize = getFontSize(baseFontSizes[size].value);
   const subValueSize = getFontSize(baseFontSizes[size].subValue);
 
   // Create refs for both label and value elements
@@ -142,10 +141,10 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
     };
   }, [label, value, subValue, valueSize, subValueSize, color]);
 
-  // Common styles for SoH
-  const sohStyles = isSoH ? {
-    fontSize: valueSize,
-    fontWeight: 900,
+  // Common styles for value display
+  const valueStyles = {
+    fontSize: isSoH ? labelSize : valueSize, // Use labelSize for SoH to match RUL
+    fontWeight: isSoH ? 700 : 900, // Match RUL's font weight for SoH
     lineHeight: 0.9,
     color: color,
     display: 'flex',
@@ -154,11 +153,12 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
     width: '100%',
     overflow: 'visible',
     textShadow: '0 4px 8px rgba(0,0,0,0.15)',
-    letterSpacing: '-0.02em',
+    letterSpacing: isSoH ? 'normal' : '-0.02em',
     whiteSpace: 'nowrap',
     margin: 0,
     padding: 0,
-  } : {};
+    fontFamily: isSoH ? 'inherit' : 'Inter, sans-serif', // Match RUL's font
+  };
 
   if (inline) {
     return (
@@ -175,13 +175,20 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
           {label}
         </span>
         <div
-          style={isSoH ? sohStyles : {}}
+          style={valueStyles}
           ref={valueRef}
         >
           <span>{value}</span>
           {subValue && (
             <span
-              style={isSoH ? { fontSize: subValueSize, marginLeft: '8px' } : {}}
+              style={{ 
+                fontSize: subValueSize, 
+                marginLeft: '8px',
+                fontWeight: 400,
+                color: "#6B7280",
+                opacity: 0.8,
+                verticalAlign: 'baseline',
+              }}
               ref={subValueRef}
             >
               {subValue}
@@ -202,34 +209,34 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
       }}
     >
       <div
-        style={isSoH ? { 
-          fontSize: valueSize,
-          fontWeight: 700,
+        style={{ 
+          fontSize: labelSize,
+          fontWeight: isSpecialLabel ? 700 : 500,
           color: "#4B5563",
           margin: 0,
           padding: 0,
           textAlign: 'center',
           lineHeight: '1.2',
-        } : {}}
+        }}
         ref={labelRef}
       >
         {label}
       </div>
       <div
-        style={isSoH ? sohStyles : {}}
+        style={valueStyles}
         ref={valueRef}
       >
         <span>{value}</span>
         {subValue && (
           <span
-            style={isSoH ? { 
+            style={{ 
               fontSize: subValueSize,
               fontWeight: 400,
               color: "#6B7280",
               marginLeft: '8px',
               opacity: 0.8,
               verticalAlign: 'baseline',
-            } : {}}
+            }}
             ref={subValueRef}
           >
             {subValue}
