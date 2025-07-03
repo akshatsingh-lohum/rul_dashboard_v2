@@ -8,6 +8,7 @@ const METRIC_SIZE_MULTIPLIER = 1.0; // 1.0 = default, 2.0 = twice as large, 0.5 
 interface LargeMetricProps {
   label: string;
   value: string | number;
+  subValue?: string; // New optional prop for sub-value
   color: string;
   size?: "medium" | "large" | "xlarge" | "xxlarge";
   inline?: boolean;
@@ -16,18 +17,20 @@ interface LargeMetricProps {
 const LargeMetric: React.FC<LargeMetricProps> = ({
   label,
   value,
+  subValue, // New prop
   color,
   size = "xlarge",
   inline = false,
 }) => {
   const valueRef = useRef<HTMLDivElement>(null);
+  const subValueRef = useRef<HTMLSpanElement>(null);
 
   // Base font sizes - these will be multiplied by METRIC_SIZE_MULTIPLIER
   const baseFontSizes = {
-    medium: { label: "24px", value: "32px" },
-    large: { label: "28px", value: "40px" },
-    xlarge: { label: "32px", value: "48px" },
-    xxlarge: { label: "36px", value: "56px" },
+    medium: { label: "24px", value: "32px", subValue: "16px" },
+    large: { label: "28px", value: "40px", subValue: "20px" },
+    xlarge: { label: "32px", value: "48px", subValue: "24px" },
+    xxlarge: { label: "36px", value: "56px", subValue: "28px" },
   };
 
   // Calculate actual font sizes based on multiplier
@@ -44,6 +47,7 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
     ? "48px" 
     : getFontSize(baseFontSizes[size].label);
   const valueSize = getFontSize(baseFontSizes[size].value);
+  const subValueSize = getFontSize(baseFontSizes[size].subValue);
 
   // Create refs for both label and value elements
   const labelRef = useRef<HTMLDivElement>(null);
@@ -53,6 +57,7 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
     // Create unique IDs for this instance
     const valueUniqueId = `metric-value-${Math.random().toString(36).substring(2, 9)}`;
     const labelUniqueId = `metric-label-${Math.random().toString(36).substring(2, 9)}`;
+    const subValueUniqueId = `metric-subvalue-${Math.random().toString(36).substring(2, 9)}`;
 
     // Add unique classes to the elements
     if (valueRef.current) {
@@ -63,7 +68,11 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
       labelRef.current.classList.add(labelUniqueId);
     }
 
-    // Create a style element with !important rules for both label and value
+    if (subValueRef.current) {
+      subValueRef.current.classList.add(subValueUniqueId);
+    }
+
+    // Create a style element with !important rules for label, value, and subValue
     const style = document.createElement("style");
     style.innerHTML = `
       .${valueUniqueId} {
@@ -71,8 +80,9 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
         font-weight: 900 !important;
         line-height: 0.9 !important;
         color: ${color} !important;
-        display: block !important;
-        text-align: center !important;
+        display: flex !important;
+        align-items: baseline !important;
+        justify-content: center !important;
         width: 100% !important;
         overflow: visible !important;
         text-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
@@ -86,6 +96,15 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
         color: #4B5563 !important;
         margin-bottom: 4px !important;
         text-align: center !important;
+      }
+
+      .${subValueUniqueId} {
+        font-size: ${subValueSize} !important;
+        font-weight: 400 !important;
+        color: #6B7280 !important;
+        margin-left: 8px !important;
+        opacity: 0.8 !important;
+        vertical-align: baseline !important;
       }
     `;
     document.head.appendChild(style);
@@ -106,7 +125,7 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
     return () => {
       document.head.removeChild(style);
     };
-  }, [label, value, valueSize, color]);
+  }, [label, value, subValue, valueSize, subValueSize, color]);
 
   if (inline) {
     return (
@@ -125,7 +144,15 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
           ref={valueRef}
           // Styles will be applied via dynamic CSS
         >
-          {value}
+          <span>{value}</span>
+          {subValue && (
+            <span
+              ref={subValueRef}
+              // Styles will be applied via dynamic CSS
+            >
+              {subValue}
+            </span>
+          )}
         </div>
       </div>
     );
@@ -150,7 +177,15 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
         ref={valueRef}
         // Styles will be applied via dynamic CSS
       >
-        {value}
+        <span>{value}</span>
+        {subValue && (
+          <span
+            ref={subValueRef}
+            // Styles will be applied via dynamic CSS
+          >
+            {subValue}
+          </span>
+        )}
       </div>
     </div>
   );
