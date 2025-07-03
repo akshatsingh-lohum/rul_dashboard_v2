@@ -40,13 +40,21 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
   };
 
   // For the specific labels we want to make bigger (SoH, RUL, OCV)
-  const isSpecialLabel = label === "SoH:" || label === "RUL:" || label === "OCV:";
+  const isSpecialLabel = label.startsWith("RUL") || label.startsWith("OCV");
+  const isSoH = label.startsWith("SoH");
   
-  // Apply a larger size specifically for these labels
-  const labelSize = isSpecialLabel 
-    ? `${Math.round(48 * METRIC_SIZE_MULTIPLIER)}px`
-    : getFontSize(baseFontSizes[size].label);
-  const valueSize = getFontSize(baseFontSizes[size].value);
+  // For SoH, both label and value should be large
+  const labelSize = isSoH 
+    ? getFontSize(baseFontSizes[size].value) // Use the value size for SoH label
+    : isSpecialLabel 
+      ? `${Math.round(48 * METRIC_SIZE_MULTIPLIER)}px`
+      : getFontSize(baseFontSizes[size].label);
+  
+  // Value size - use the same size as label for SoH
+  const valueSize = isSoH 
+    ? labelSize 
+    : getFontSize(baseFontSizes[size].value);
+    
   const subValueSize = getFontSize(baseFontSizes[size].subValue);
 
   // Create refs for both label and value elements
@@ -74,8 +82,11 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
 
     // Create a style element with !important rules for label, value, and subValue
     const style = document.createElement("style");
+    style.setAttribute('data-metric-styles', 'true');
     style.innerHTML = `
-      .${valueUniqueId} {
+      .${valueUniqueId}, 
+      .${valueUniqueId} *,
+      .${valueUniqueId} > * {
         font-size: ${valueSize} !important;
         font-weight: 900 !important;
         line-height: 0.9 !important;
@@ -90,12 +101,16 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
         white-space: nowrap !important;
       }
       
-      .${labelUniqueId} {
+      .${labelUniqueId},
+      .${labelUniqueId} *,
+      .${labelUniqueId} > * {
         font-size: ${labelSize} !important;
         font-weight: ${isSpecialLabel ? 700 : 500} !important;
         color: #4B5563 !important;
-        margin-bottom: 4px !important;
+        margin: 0 !important;
+        padding: 0 !important;
         text-align: center !important;
+        line-height: 1.2 !important;
       }
 
       .${subValueUniqueId} {
@@ -127,6 +142,24 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
     };
   }, [label, value, subValue, valueSize, subValueSize, color]);
 
+  // Common styles for SoH
+  const sohStyles = isSoH ? {
+    fontSize: valueSize,
+    fontWeight: 900,
+    lineHeight: 0.9,
+    color: color,
+    display: 'flex',
+    alignItems: 'baseline',
+    justifyContent: 'center',
+    width: '100%',
+    overflow: 'visible',
+    textShadow: '0 4px 8px rgba(0,0,0,0.15)',
+    letterSpacing: '-0.02em',
+    whiteSpace: 'nowrap',
+    margin: 0,
+    padding: 0,
+  } : {};
+
   if (inline) {
     return (
       <div style={{ display: "flex", alignItems: "center" }}>
@@ -136,19 +169,20 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
             fontWeight: 500,
             color: "#4B5563",
             marginRight: "8px",
+            ...(isSoH ? { fontSize: valueSize, fontWeight: 700 } : {})
           }}
         >
           {label}
         </span>
         <div
+          style={isSoH ? sohStyles : {}}
           ref={valueRef}
-          // Styles will be applied via dynamic CSS
         >
           <span>{value}</span>
           {subValue && (
             <span
+              style={isSoH ? { fontSize: subValueSize, marginLeft: '8px' } : {}}
               ref={subValueRef}
-              // Styles will be applied via dynamic CSS
             >
               {subValue}
             </span>
@@ -168,20 +202,35 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
       }}
     >
       <div
+        style={isSoH ? { 
+          fontSize: valueSize,
+          fontWeight: 700,
+          color: "#4B5563",
+          margin: 0,
+          padding: 0,
+          textAlign: 'center',
+          lineHeight: '1.2',
+        } : {}}
         ref={labelRef}
-        // Styles will be applied via dynamic CSS
       >
         {label}
       </div>
       <div
+        style={isSoH ? sohStyles : {}}
         ref={valueRef}
-        // Styles will be applied via dynamic CSS
       >
         <span>{value}</span>
         {subValue && (
           <span
+            style={isSoH ? { 
+              fontSize: subValueSize,
+              fontWeight: 400,
+              color: "#6B7280",
+              marginLeft: '8px',
+              opacity: 0.8,
+              verticalAlign: 'baseline',
+            } : {}}
             ref={subValueRef}
-            // Styles will be applied via dynamic CSS
           >
             {subValue}
           </span>
