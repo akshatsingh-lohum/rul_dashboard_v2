@@ -60,10 +60,14 @@ const Index = () => {
           Press on the analyse button to start cell capacity estimation.
         </div> */}
         <Button
+          asChild
+          variant={null}
+          size={null}
           onClick={handleStart}
-          className="bg-green-400 hover:bg-green-500 text-black rounded-full w-64 h-64 text-5xl font-bold"
+          className="!bg-green-400 hover:!bg-green-500 !text-black !rounded-full !w-80 !h-80 !text-5xl !font-bold !flex !items-center !justify-center"
+          style={{ padding: "1.0rem" }}
         >
-          ANALYSE
+          <div>ANALYSE</div>
         </Button>
       </div>
     </div>
