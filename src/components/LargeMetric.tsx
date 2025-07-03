@@ -35,7 +35,7 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
 
   // Calculate actual font sizes based on multiplier
   const getFontSize = (size: string) => {
-    const numericSize = parseInt(size);
+    const numericSize = parseInt(size.replace('px', ''));
     return `${Math.round(numericSize * METRIC_SIZE_MULTIPLIER)}px`;
   };
 
@@ -44,7 +44,7 @@ const LargeMetric: React.FC<LargeMetricProps> = ({
   
   // Apply a larger size specifically for these labels
   const labelSize = isSpecialLabel 
-    ? "48px" 
+    ? `${Math.round(48 * METRIC_SIZE_MULTIPLIER)}px`
     : getFontSize(baseFontSizes[size].label);
   const valueSize = getFontSize(baseFontSizes[size].value);
   const subValueSize = getFontSize(baseFontSizes[size].subValue);
