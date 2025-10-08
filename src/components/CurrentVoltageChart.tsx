@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -21,60 +21,103 @@ const CurrentVoltageChart: React.FC<CurrentVoltageChartProps> = ({
   const [data, setData] = useState<ChartDataPoint[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [chartHeight, setChartHeight] = useState(0);
+  const [sortedData, setSortedData] = useState<{voltage: number[], current: number[]}>({ voltage: [], current: [] });
+  const animationRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number>(0);
+  const pointsPerSecond = 30; // Adjust for smoother animation
 
-  // Set chart height on mount
+  // Prepare and sort the data on mount
   useEffect(() => {
     // Set a fixed height for the chart container
     setChartHeight(400);
 
-    // Initialize with some data points immediately
-    const initialPoints = 30;
+    // Sort the data by voltage (x-axis) for left-to-right plotting
+    const sortedVoltages = [...currentVoltageData.voltage];
+    const sortedCurrents = [...currentVoltageData.current];
+    
+    // Create pairs and sort by voltage
+    const pairs = sortedVoltages.map((voltage, index) => ({
+      voltage,
+      current: sortedCurrents[index],
+    }));
+    
+    pairs.sort((a, b) => a.voltage - b.voltage);
+    
+    // Extract sorted arrays
+    const sortedData = {
+      voltage: pairs.map(pair => pair.voltage),
+      current: pairs.map(pair => pair.current),
+    };
+    
+    setSortedData(sortedData);
+    
+    // Start with just a few points
+    const initialPoints = 5;
     const initialData: ChartDataPoint[] = [];
-
-    for (
-      let i = 0;
-      i < initialPoints && i < currentVoltageData.current.length;
-      i++
-    ) {
+    
+    for (let i = 0; i < initialPoints && i < sortedData.voltage.length; i++) {
       initialData.push({
-        x: currentVoltageData.voltage[i],
-        y: currentVoltageData.current[i],
+        x: sortedData.voltage[i],
+        y: sortedData.current[i],
       });
     }
-
+    
     setData(initialData);
     setCurrentIndex(initialPoints);
   }, []);
 
+  // Animation frame-based rendering for smoother animation
   useEffect(() => {
-    if (currentIndex >= currentVoltageData.current.length) {
+    if (currentIndex >= sortedData.voltage.length) {
       onComplete();
       return;
     }
 
-    const interval = setInterval(() => {
-      // Add 15 data points per second (every ~67ms per point)
-      const pointsToAdd = Math.min(
-        15,
-        currentVoltageData.current.length - currentIndex
-      );
-
-      const newPoints: ChartDataPoint[] = [];
-      for (let i = 0; i < pointsToAdd; i++) {
-        if (currentIndex + i < currentVoltageData.current.length) {
-          newPoints.push({
-            x: currentVoltageData.voltage[currentIndex + i],
-            y: currentVoltageData.current[currentIndex + i],
-          });
+    const animate = (timestamp: number) => {
+      if (!lastTimeRef.current) lastTimeRef.current = timestamp;
+      
+      const elapsed = timestamp - lastTimeRef.current;
+      const pointsToAdd = Math.floor((elapsed / 1000) * pointsPerSecond);
+      
+      if (pointsToAdd > 0) {
+        lastTimeRef.current = timestamp;
+        
+        const newPoints: ChartDataPoint[] = [];
+        const actualPointsToAdd = Math.min(
+          pointsToAdd,
+          sortedData.voltage.length - currentIndex
+        );
+        
+        for (let i = 0; i < actualPointsToAdd; i++) {
+          if (currentIndex + i < sortedData.voltage.length) {
+            newPoints.push({
+              x: sortedData.voltage[currentIndex + i],
+              y: sortedData.current[currentIndex + i],
+            });
+          }
+        }
+        
+        if (newPoints.length > 0) {
+          setData(prevData => [...prevData, ...newPoints]);
+          setCurrentIndex(prev => prev + actualPointsToAdd);
         }
       }
-
-      setData((prevData) => [...prevData, ...newPoints]);
-      setCurrentIndex((prev) => prev + pointsToAdd);
-    }, 1000); // Add points every second
-
-    return () => clearInterval(interval);
-  }, [currentIndex, onComplete]);
+      
+      if (currentIndex < sortedData.voltage.length) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        onComplete();
+      }
+    };
+    
+    animationRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [currentIndex, onComplete, sortedData]);
 
   // Calculate fixed axis ranges from the complete dataset
   const allVoltages = currentVoltageData.voltage;
@@ -88,11 +131,6 @@ const CurrentVoltageChart: React.FC<CurrentVoltageChartProps> = ({
   // Add some padding to the ranges
   const voltagePadding = (voltageMax - voltageMin) * 0.1;
   const currentPadding = (currentMax - currentMin) * 0.1;
-
-  console.log("Chart data points:", data.length);
-  console.log("Current index:", currentIndex);
-  console.log("Voltage range:", voltageMin, voltageMax);
-  console.log("Current range:", currentMin, currentMax);
 
   // If no data, show a loading message
   if (data.length === 0) {
@@ -182,7 +220,7 @@ const CurrentVoltageChart: React.FC<CurrentVoltageChartProps> = ({
             strokeWidth={4}
             dot={{ r: 2 }}
             activeDot={{ r: 8 }}
-            isAnimationActive={true}
+            isAnimationActive={false} // Disable built-in animation for smoother custom animation
           />
         </RechartsLineChart>
       </ResponsiveContainer>
