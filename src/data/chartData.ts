@@ -87,18 +87,35 @@ const cell4VoltageData = [
 
 // Voltage vs Time data for real-time plotting
 export const voltageTimeData = (() => {
+  // Randomly select one of the four cell voltage datasets
+  const cellDatasets = [
+    cell1VoltageData,
+    cell2VoltageData,
+    cell3VoltageData,
+    cell4VoltageData
+  ];
+  
+  // Get a random index between 0 and 3
+  const randomIndex = Math.floor(Math.random() * 4);
+  
+  // Select the random cell data
+  const selectedCellData = cellDatasets[randomIndex];
+  
+  console.log(`[DEBUG] Randomly selected Cell ${randomIndex + 1} data for voltage-time chart`);
+  
   // Create pairs of time and voltage values
   const pairs = timePoints.map((time, index) => ({
     time,
     voltage:
-      cell1VoltageData[index] ||
-      cell1VoltageData[cell1VoltageData.length - 1],
+      selectedCellData[index] ||
+      selectedCellData[selectedCellData.length - 1],
   }));
 
   // Return time and voltage arrays
   return {
     time: pairs.map((pair) => pair.time),
     voltage: pairs.map((pair) => pair.voltage),
+    selectedCell: randomIndex + 1, // Store which cell was selected (1-indexed)
   };
 })();
 
@@ -189,7 +206,7 @@ const createCellVoltageTimeData = (voltageData: number[]) => {
 export const cellsData: Record<CellNumber, CellData> = {
   1: {
     SoH: 98.23,
-    RUL: 912, 
+    RUL: 912,
     OCV: 3.5254,
     nyquistData: createCellVoltageTimeData(cell1VoltageData),
     bodeMagnitudeData: bodeMagnitudeData,

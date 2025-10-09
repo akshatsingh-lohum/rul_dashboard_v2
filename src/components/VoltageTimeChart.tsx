@@ -15,9 +15,7 @@ interface VoltageTimeChartProps {
   onComplete: () => void;
 }
 
-const VoltageTimeChart: React.FC<VoltageTimeChartProps> = ({
-  onComplete,
-}) => {
+const VoltageTimeChart: React.FC<VoltageTimeChartProps> = ({ onComplete }) => {
   const [data, setData] = useState<ChartDataPoint[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [chartHeight, setChartHeight] = useState(0);
@@ -45,13 +43,13 @@ const VoltageTimeChart: React.FC<VoltageTimeChartProps> = ({
     // Use the time-voltage data directly (already in correct order)
     const timePoints = [...voltageTimeData.time];
     const voltagePoints = [...voltageTimeData.voltage];
-    
+
     // Set the chart data
     const chartData = {
       time: timePoints,
       voltage: voltagePoints,
     };
-    
+
     setChartData(chartData);
 
     // Start with just a few points
@@ -78,9 +76,7 @@ const VoltageTimeChart: React.FC<VoltageTimeChartProps> = ({
       console.log(
         `[DEBUG CHART] Animation progress: ${currentIndex}/${
           chartData.time.length
-        } points (${Math.round(
-          (currentIndex / chartData.time.length) * 100
-        )}%)`
+        } points (${Math.round((currentIndex / chartData.time.length) * 100)}%)`
       );
     }
 
@@ -143,6 +139,7 @@ const VoltageTimeChart: React.FC<VoltageTimeChartProps> = ({
   // Calculate fixed axis ranges from the complete dataset
   const allTimes = voltageTimeData.time;
   const allVoltages = voltageTimeData.voltage;
+  const selectedCell = voltageTimeData.selectedCell as number;
 
   const timeMin = Math.min(...allTimes);
   const timeMax = Math.max(...allTimes);
@@ -166,9 +163,7 @@ const VoltageTimeChart: React.FC<VoltageTimeChartProps> = ({
 
   return (
     <div className="w-full" style={{ height: `${chartHeight}px` }}>
-      <h2 className="text-3xl font-bold mb-4 text-center">
-        Voltage vs Time Analysis
-      </h2>
+      <h2 className="text-3xl font-bold mb-4 text-center">Voltage vs Time</h2>
       <ResponsiveContainer width="100%" height="100%">
         <RechartsLineChart
           data={data}
