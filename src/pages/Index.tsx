@@ -135,7 +135,7 @@ const Index = () => {
         />
       </div>
 
-      <div className="flex-1 flex flex-col max-w-6xl mx-auto w-full">
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
         <div className="flex items-center gap-6 mb-5">
           <Button
             onClick={handleBackToStart}
@@ -145,76 +145,34 @@ const Index = () => {
             <ArrowLeft size={28} />
             Back to Start
           </Button>
-          <h2 className="text-4xl font-semibold text-gray-800">Cell Results</h2>
+          <h2 className="text-4xl font-semibold text-gray-800">Cell {selectedCell} Results</h2>
         </div>
 
-        <div className="bg-white border border-gray-400 rounded-lg p-6 mb-4">
-          <div className="flex justify-center items-center mb-8 py-6 border-b border-gray-300">
-            <div className="flex flex-wrap items-center justify-center gap-12">
-              <LargeMetric
-                label="SoH:"
-                value={`${cellsData[selectedCell].SoH.toFixed(1)}%`}
-                subValue={`(±2%)`}
-                color="#22c55e"
-                size="xlarge"
-              />
-              <LargeMetric
-                label="RUL:"
-                value={cellsData[selectedCell].RUL}
-                color="#3b82f6"
-                size="xlarge"
-              />
-              <LargeMetric
-                label="OCV:"
-                value={`${cellsData[selectedCell].OCV}V`}
-                color="#a855f7"
-                size="xlarge"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 flex flex-col">
-              <h3 className="text-2xl font-semibold mb-4 text-gray-700 text-center">
-                Nyquist Plot
-              </h3>
-              <div
-                className="flex-1"
-                style={{
-                  aspectRatio: "1",
-                  minHeight: "240px",
-                  maxHeight: "320px",
-                }}
-              >
-                <LineChart
-                  data={cellsData[selectedCell].nyquistData}
-                  color="#3b82f6"
-                  xAxisLabel="Z_real (Ω)"
-                  yAxisLabel="-Z_img (Ω)"
-                  units="Ω"
-                  yAxisPrecision={4}
-                />
-              </div>
-            </div>
-
-            <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 flex flex-col">
-              <h3 className="text-2xl font-semibold mb-4 text-gray-700 text-center">
-                Bode Plot
-              </h3>
-              <div
-                className="flex-1"
-                style={{
-                  aspectRatio: "1",
-                  minHeight: "240px",
-                  maxHeight: "320px",
-                }}
-              >
-                <CombinedBodeChart
-                  magnitudeData={cellsData[selectedCell].bodeMagnitudeData}
-                  phaseData={cellsData[selectedCell].bodePhaseData}
-                />
-              </div>
-            </div>
+        <div className="bg-white border border-gray-400 rounded-lg p-8 mb-4 flex-1 flex flex-col justify-center">
+          <h3 className="text-3xl font-bold mb-12 text-center text-gray-700">
+            Battery Health Analysis
+          </h3>
+          
+          <div className="flex flex-col items-center justify-center gap-10 py-8">
+            <LargeMetric
+              label="State of Health"
+              value={`${cellsData[selectedCell].SoH.toFixed(1)}%`}
+              subValue={`(±2%)`}
+              color="#22c55e"
+              size="xlarge"
+            />
+            <LargeMetric
+              label="Remaining Life"
+              value={`${cellsData[selectedCell].RUL} cycles`}
+              color="#3b82f6"
+              size="xlarge"
+            />
+            <LargeMetric
+              label="Open Circuit Voltage"
+              value={`${cellsData[selectedCell].OCV}V`}
+              color="#a855f7"
+              size="xlarge"
+            />
           </div>
         </div>
       </div>
