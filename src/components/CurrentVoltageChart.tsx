@@ -21,12 +21,18 @@ const CurrentVoltageChart: React.FC<CurrentVoltageChartProps> = ({
   const [data, setData] = useState<ChartDataPoint[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [chartHeight, setChartHeight] = useState(0);
-  const [sortedData, setSortedData] = useState<{voltage: number[], current: number[]}>({ voltage: [], current: [] });
+  const [sortedData, setSortedData] = useState<{
+    voltage: number[];
+    current: number[];
+  }>({ voltage: [], current: [] });
   const animationRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const completionCalledRef = useRef(false); // Track if we've called onComplete
   const totalDuration = 25 * 1000; // 25 seconds
-  const pointsPerSecond = sortedData.voltage.length > 0 ? sortedData.voltage.length / (totalDuration / 1000) : 0;
+  const pointsPerSecond =
+    sortedData.voltage.length > 0
+      ? sortedData.voltage.length / (totalDuration / 1000)
+      : 0;
 
   // Prepare and sort the data on mount
   useEffect(() => {
@@ -39,34 +45,34 @@ const CurrentVoltageChart: React.FC<CurrentVoltageChartProps> = ({
     // Sort the data by voltage (x-axis) for left-to-right plotting
     const sortedVoltages = [...currentVoltageData.voltage];
     const sortedCurrents = [...currentVoltageData.current];
-    
+
     // Create pairs and sort by voltage
     const pairs = sortedVoltages.map((voltage, index) => ({
       voltage,
       current: sortedCurrents[index],
     }));
-    
+
     pairs.sort((a, b) => a.voltage - b.voltage);
-    
+
     // Extract sorted arrays
     const sortedData = {
-      voltage: pairs.map(pair => pair.voltage),
-      current: pairs.map(pair => pair.current),
+      voltage: pairs.map((pair) => pair.voltage),
+      current: pairs.map((pair) => pair.current),
     };
-    
+
     setSortedData(sortedData);
-    
+
     // Start with just a few points
     const initialPoints = 5;
     const initialData: ChartDataPoint[] = [];
-    
+
     for (let i = 0; i < initialPoints && i < sortedData.voltage.length; i++) {
       initialData.push({
         x: sortedData.voltage[i],
         y: sortedData.current[i],
       });
     }
-    
+
     setData(initialData);
     setCurrentIndex(initialPoints);
   }, []);
@@ -75,26 +81,32 @@ const CurrentVoltageChart: React.FC<CurrentVoltageChartProps> = ({
   useEffect(() => {
     // NEVER call onComplete here - we'll call it at the end of the animation
     // This prevents the early completion bug
-    
+
     if (sortedData.voltage.length > 0) {
-      console.log(`[DEBUG CHART] Animation progress: ${currentIndex}/${sortedData.voltage.length} points (${Math.round(currentIndex/sortedData.voltage.length*100)}%)`);
+      console.log(
+        `[DEBUG CHART] Animation progress: ${currentIndex}/${
+          sortedData.voltage.length
+        } points (${Math.round(
+          (currentIndex / sortedData.voltage.length) * 100
+        )}%)`
+      );
     }
 
     const animate = (timestamp: number) => {
       if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-      
+
       const elapsed = timestamp - lastTimeRef.current;
       const pointsToAdd = Math.floor((elapsed / 1000) * pointsPerSecond);
-      
+
       if (pointsToAdd > 0) {
         lastTimeRef.current = timestamp;
-        
+
         const newPoints: ChartDataPoint[] = [];
         const actualPointsToAdd = Math.min(
           pointsToAdd,
           sortedData.voltage.length - currentIndex
         );
-        
+
         for (let i = 0; i < actualPointsToAdd; i++) {
           if (currentIndex + i < sortedData.voltage.length) {
             newPoints.push({
@@ -103,30 +115,32 @@ const CurrentVoltageChart: React.FC<CurrentVoltageChartProps> = ({
             });
           }
         }
-        
+
         if (newPoints.length > 0) {
-          setData(prevData => [...prevData, ...newPoints]);
-          setCurrentIndex(prev => prev + actualPointsToAdd);
+          setData((prevData) => [...prevData, ...newPoints]);
+          setCurrentIndex((prev) => prev + actualPointsToAdd);
         }
       }
-      
+
       // Continue animation until we've processed all points
       if (currentIndex < sortedData.voltage.length) {
         animationRef.current = requestAnimationFrame(animate);
-      } 
+      }
       // When we reach 100% completion, call onComplete immediately
       else if (!completionCalledRef.current && sortedData.voltage.length > 0) {
-        console.log(`[DEBUG CHART] Animation TRULY complete after ${currentIndex}/${sortedData.voltage.length} points (100%)`);
+        console.log(
+          `[DEBUG CHART] Animation TRULY complete after ${currentIndex}/${sortedData.voltage.length} points (100%)`
+        );
         completionCalledRef.current = true;
-        
+
         // Call onComplete immediately when we reach 100%
-        console.log('[DEBUG CHART] Reached 100%, calling onComplete()');
+        console.log("[DEBUG CHART] Reached 100%, calling onComplete()");
         onComplete();
       }
     };
-    
+
     animationRef.current = requestAnimationFrame(animate);
-    
+
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);

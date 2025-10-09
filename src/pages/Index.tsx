@@ -115,19 +115,11 @@ const Index = () => {
 
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
         <div
-          className="bg-white border border-gray-400 rounded-lg p-6 flex-1 mb-4"
-          style={{ minHeight: "500px" }}
+          className="bg-white border border-gray-400 rounded-lg p-6 flex-0 mb-4"
+          style={{ minHeight: "600px" }}
         >
           <CurrentVoltageChart onComplete={handleChartComplete} />
         </div>
-
-        {analysisComplete && (
-          <div className="text-center p-4">
-            {/* <p className="text-2xl font-semibold text-gray-700 animate-pulse">
-              Press a number (1-5) to view cell results
-            </p> */}
-          </div>
-        )}
       </div>
     </div>
   );
