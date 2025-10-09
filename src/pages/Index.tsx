@@ -145,14 +145,14 @@ const Index = () => {
             <ArrowLeft size={28} />
             Back to Start
           </Button>
-          <h2 className="text-4xl font-semibold text-gray-800">Cell {selectedCell} Results</h2>
+          <h2 className="text-4xl font-semibold text-gray-800">Cell Results</h2>
         </div>
 
         <div className="bg-white border border-gray-400 rounded-lg p-8 mb-4 flex-1 flex flex-col justify-center">
           <h3 className="text-3xl font-bold mb-12 text-center text-gray-700">
             Battery Health Analysis
           </h3>
-          
+
           <div className="flex flex-col items-center justify-center gap-10 py-8">
             <LargeMetric
               label="State of Health"
