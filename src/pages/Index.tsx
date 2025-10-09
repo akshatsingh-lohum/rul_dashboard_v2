@@ -1,45 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import LineChart from "@/components/LineChart";
-import LoadingProgress from "@/components/LoadingProgress";
 import CurrentVoltageChart from "@/components/CurrentVoltageChart";
 import CombinedBodeChart from "@/components/CombinedBodeChart";
 import LargeMetric from "@/components/LargeMetric";
 
-import {
-  nyquistData,
-  bodeMagnitudeData,
-  bodePhaseData,
-  currentVoltageData,
-  resultsData,
-} from "@/data/chartData";
+import { cellsData, CellNumber } from "@/data/chartData";
 
 type Screen = "start" | "analysis" | "results";
 
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>("start");
-  const [showCheckResults, setShowCheckResults] = useState(false);
+  const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [selectedCell, setSelectedCell] = useState<CellNumber>(1);
 
   const handleStart = () => {
+    // Reset the analysis state when starting a new analysis
+    setAnalysisComplete(false);
     setCurrentScreen("analysis");
   };
 
   const handleChartComplete = () => {
-    // Add a 2-second delay before showing the Check Results button
-    setTimeout(() => {
-      setShowCheckResults(true);
-    }, 2000);
+    console.log(
+      "[DEBUG] Chart animation complete, setting analysisComplete to true"
+    );
+    setAnalysisComplete(true);
   };
 
-  const handleCheckResults = () => {
+  const handleSelectCell = (cellNumber: CellNumber) => {
+    setSelectedCell(cellNumber);
     setCurrentScreen("results");
   };
 
   const handleBackToStart = () => {
     setCurrentScreen("start");
-    setShowCheckResults(false);
+    setAnalysisComplete(false);
   };
+
+  // This effect handles the keyboard listener
+  useEffect(() => {
+    // Create the handler function
+    const handleKeyDown = (event: KeyboardEvent) => {
+      console.log(
+        `[DEBUG] Key pressed: ${event.key}, analysisComplete: ${analysisComplete}, currentScreen: ${currentScreen}`
+      );
+
+      // CRITICAL: Only process key presses if analysis is complete
+      // This ensures keys 1-5 do nothing while the chart is still animating
+      if (analysisComplete && currentScreen === "analysis") {
+        console.log(
+          `[DEBUG] Conditions met, processing key press: ${event.key}`
+        );
+        const key = parseInt(event.key, 10);
+        if (key >= 1 && key <= 5) {
+          console.log(`[DEBUG] Valid cell key (${key}), navigating to results`);
+          handleSelectCell(key as CellNumber);
+        }
+      } else {
+        console.log(
+          `[DEBUG] Ignoring key press: analysisComplete=${analysisComplete}, currentScreen=${currentScreen}`
+        );
+      }
+    };
+
+    // Add the listener
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup function to remove the listener
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [analysisComplete, currentScreen]); // Re-run when these states change
 
   const renderStartScreen = () => (
     <div className="min-h-screen bg-gray-50 p-5 flex flex-col">
@@ -56,9 +88,6 @@ const Index = () => {
         <h1 className="text-5xl font-bold mb-8 text-center">
           Real Time Cell Capacity Estimation
         </h1>
-        {/* <div className="w-80 text-2xl text-gray-600 text-center">
-          Press on the analyse button to start cell capacity estimation.
-        </div> */}
         <Button
           asChild
           variant={null}
@@ -85,28 +114,18 @@ const Index = () => {
       </div>
 
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
-        <div className="mb-4">
-          <LoadingProgress onComplete={() => {}} />
-        </div>
-
         <div
           className="bg-white border border-gray-400 rounded-lg p-6 flex-1 mb-4"
           style={{ minHeight: "500px" }}
         >
-          <h1 className="text-3xl font-bold mb-4 text-center">
-            Battery Analysis in Progress
-          </h1>
           <CurrentVoltageChart onComplete={handleChartComplete} />
         </div>
 
-        {showCheckResults && (
-          <div className="flex justify-center pb-3">
-            <Button
-              onClick={handleCheckResults}
-              className="bg-blue-500 hover:bg-blue-600 text-white text-2xl font-bold px-10 py-5 rounded-lg"
-            >
-              Check Results
-            </Button>
+        {analysisComplete && (
+          <div className="text-center p-4">
+            {/* <p className="text-2xl font-semibold text-gray-700 animate-pulse">
+              Press a number (1-5) to view cell results
+            </p> */}
           </div>
         )}
       </div>
@@ -134,29 +153,28 @@ const Index = () => {
             <ArrowLeft size={28} />
             Back to Start
           </Button>
-          <h2 className="text-4xl font-semibold text-gray-800">Results</h2>
+          <h2 className="text-4xl font-semibold text-gray-800">Cell Results</h2>
         </div>
 
         <div className="bg-white border border-gray-400 rounded-lg p-6 mb-4">
-          {/* Large metrics row at the top of the box */}
           <div className="flex justify-center items-center mb-8 py-6 border-b border-gray-300">
             <div className="flex flex-wrap items-center justify-center gap-12">
               <LargeMetric
                 label="SoH:"
-                value={`${resultsData.SoH.toFixed(1)}%`}
+                value={`${cellsData[selectedCell].SoH.toFixed(1)}%`}
                 subValue={`(±2%)`}
                 color="#22c55e"
                 size="xlarge"
               />
               <LargeMetric
                 label="RUL:"
-                value={resultsData.RUL}
+                value={cellsData[selectedCell].RUL}
                 color="#3b82f6"
                 size="xlarge"
               />
               <LargeMetric
                 label="OCV:"
-                value={`${resultsData.OCV}V`}
+                value={`${cellsData[selectedCell].OCV}V`}
                 color="#a855f7"
                 size="xlarge"
               />
@@ -177,7 +195,7 @@ const Index = () => {
                 }}
               >
                 <LineChart
-                  data={nyquistData}
+                  data={cellsData[selectedCell].nyquistData}
                   color="#3b82f6"
                   xAxisLabel="Z_real (Ω)"
                   yAxisLabel="-Z_img (Ω)"
@@ -200,8 +218,8 @@ const Index = () => {
                 }}
               >
                 <CombinedBodeChart
-                  magnitudeData={bodeMagnitudeData}
-                  phaseData={bodePhaseData}
+                  magnitudeData={cellsData[selectedCell].bodeMagnitudeData}
+                  phaseData={cellsData[selectedCell].bodePhaseData}
                 />
               </div>
             </div>

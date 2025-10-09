@@ -24,10 +24,15 @@ const CurrentVoltageChart: React.FC<CurrentVoltageChartProps> = ({
   const [sortedData, setSortedData] = useState<{voltage: number[], current: number[]}>({ voltage: [], current: [] });
   const animationRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
-  const pointsPerSecond = 30; // Adjust for smoother animation
+  const completionCalledRef = useRef(false); // Track if we've called onComplete
+  const totalDuration = 25 * 1000; // 25 seconds
+  const pointsPerSecond = sortedData.voltage.length > 0 ? sortedData.voltage.length / (totalDuration / 1000) : 0;
 
   // Prepare and sort the data on mount
   useEffect(() => {
+    console.log("[DEBUG CHART] Initializing chart data");
+    // Reset completion state
+    completionCalledRef.current = false;
     // Set a fixed height for the chart container
     setChartHeight(400);
 
@@ -68,9 +73,11 @@ const CurrentVoltageChart: React.FC<CurrentVoltageChartProps> = ({
 
   // Animation frame-based rendering for smoother animation
   useEffect(() => {
-    if (currentIndex >= sortedData.voltage.length) {
-      onComplete();
-      return;
+    // NEVER call onComplete here - we'll call it at the end of the animation
+    // This prevents the early completion bug
+    
+    if (sortedData.voltage.length > 0) {
+      console.log(`[DEBUG CHART] Animation progress: ${currentIndex}/${sortedData.voltage.length} points (${Math.round(currentIndex/sortedData.voltage.length*100)}%)`);
     }
 
     const animate = (timestamp: number) => {
@@ -103,9 +110,17 @@ const CurrentVoltageChart: React.FC<CurrentVoltageChartProps> = ({
         }
       }
       
+      // Continue animation until we've processed all points
       if (currentIndex < sortedData.voltage.length) {
         animationRef.current = requestAnimationFrame(animate);
-      } else {
+      } 
+      // When we reach 100% completion, call onComplete immediately
+      else if (!completionCalledRef.current && sortedData.voltage.length > 0) {
+        console.log(`[DEBUG CHART] Animation TRULY complete after ${currentIndex}/${sortedData.voltage.length} points (100%)`);
+        completionCalledRef.current = true;
+        
+        // Call onComplete immediately when we reach 100%
+        console.log('[DEBUG CHART] Reached 100%, calling onComplete()');
         onComplete();
       }
     };
