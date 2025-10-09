@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import LineChart from "@/components/LineChart";
-import CurrentVoltageChart from "@/components/CurrentVoltageChart";
+import VoltageTimeChart from "@/components/VoltageTimeChart";
 import CombinedBodeChart from "@/components/CombinedBodeChart";
 import LargeMetric from "@/components/LargeMetric";
 
@@ -118,7 +118,7 @@ const Index = () => {
           className="bg-white border border-gray-400 rounded-lg p-6 flex-0 mb-4"
           style={{ minHeight: "600px" }}
         >
-          <CurrentVoltageChart onComplete={handleChartComplete} />
+          <VoltageTimeChart onComplete={handleChartComplete} />
         </div>
       </div>
     </div>
