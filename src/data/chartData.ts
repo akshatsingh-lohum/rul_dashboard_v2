@@ -10,63 +10,95 @@ export interface BubbleDataPoint {
   size: number;
 }
 
-// Current vs Voltage data for real-time plotting
-const rawCurrentVoltageData = {
-  current: [
-    0, 2.59797513, 3.89786171, 3.57737438, -0.1604528, 4.11719391, 3.2678036,
-    2.86225662, 1.47028498, 3.40504349, 1.76054471, 1.47924956, 3.02425805,
-    0.6635377, 2.78498489, 1.63993607, 0.05995904, -4.452387, -0.10559705,
-    1.31155121, 1.70405736, 2.43205735, 1.46103118, 2.23056617, 3.04215603,
-    5.91544957, 1.18504144, 2.69664491, 2.57737355, 2.05978976, 0.57883715,
-    2.49567456, 3.50527742, 1.62394344, 2.63231405, -2.4943027, -2.66375994,
-    -1.68875713, 1.27417867, -2.47589708, -2.0359088, -0.26266166, -0.05046748,
-    2.92017948, 2.64822204, 2.69175895, 0.54177887, 4.09238957, 0.97766854,
-    1.45393157, 4.02578151, 5.54113145, 4.13718002, 2.212793, 2.66621493,
-    -0.05068464, 3.60454922, 1.17731989, -1.36829285, -3.36083889, 0.25625577,
-    0.43701786, 0.20186143, 2.52047757, 0.28261303, 1.22656762, 0.13952203,
-    0.98272317, -1.42046555, 3.1480395, 3.18381386, 0.55363575, 0.61910102,
-    1.58758492, 2.96884534, 1.05414829, 1.43808667, -4.538545, -3.32866,
-    -2.04758205, -1.52321849, -3.0988626, -1.43352419, -0.27767043, -3.00706415,
-    -0.69076156, -2.20845445, -0.41020308, -0.19948105, 1.59427325, -2.06749007,
-    -0.07970076, 4.46317482, 4.23948035, 4.01886882, 1.62057286, 1.64542394,
-    -0.6763551, 3.05725986, 0.4408622,
-  ],
-  voltage: [
-    0, 0.06363922, 0.44905059, 0.40879255, 0.0640137, 0.43262651, 0.51594443,
-    0.29215032, 0.36632757, 0.44435116, -0.02927913, -0.09525489, 0.13575622,
-    -0.17998478, -0.22970785, -0.10490692, -0.38638129, -0.69049423,
-    -0.23920675, -0.15368032, -0.28087051, 0.00639855, 0.05090164, -0.13295939,
-    0.16060671, 0.55312413, 0.25641369, 0.36430648, 0.5208292, 0.2306528,
-    0.12992227, 0.45805218, 0.29300214, -0.03591107, 0.10462737, -0.22128038,
-    -0.49960974, -0.25306913, -0.1121222, -0.52159566, -0.41696208, -0.24445764,
-    -0.4474174, -0.17012936, 0.19166148, 0.0608338, -0.03148253, 0.36560583,
-    0.2035853, 0.18484251, 0.59709847, 0.5711465, 0.21472818, 0.27671161,
-    0.27827585, -0.09688276, 0.13001301, 0.12710021, -0.3394274, -0.48468664,
-    -0.23074394, -0.43596062, -0.43320323, -0.05985201, -0.28315028,
-    -0.40382743, -0.10225034, 0.02569818, -0.10536752, 0.35662644, 0.43347843,
-    0.0855493, 0.25044265, 0.47337727, 0.29764445, 0.28512942, 0.43779281,
-    -0.10214367, -0.24460406, -0.0135665, -0.16858578, -0.40532165, -0.19233994,
-    -0.33034633, -0.69412971, -0.3527905, -0.23391423, -0.34103005, -0.13938784,
-    0.08770947, -0.23372931, -0.01783058, 0.47257311, 0.3494618, 0.32963786,
-    0.48698414, 0.28424551, 0.03889055, 0.42510454, 0.2815663,
-  ],
+// Voltage vs Time data for real-time plotting
+// Based on provided data for channel 39, 40, 38, 37
+
+// Generate time points with 0.5 second increments (0 to 49.5 seconds for 100 points)
+const generateTimePoints = (count: number): number[] => {
+  const result: number[] = [];
+  const increment = 0.5; // 0.5 second increments
+  for (let i = 0; i < count; i++) {
+    result.push(i * increment); // Each step is 0.5 seconds
+  }
+  return result;
 };
 
-// Current vs Voltage data sorted by voltage values
-export const currentVoltageData = (() => {
-  // Create pairs of voltage and current values
-  const pairs = rawCurrentVoltageData.voltage.map((voltage, index) => ({
-    voltage,
-    current: rawCurrentVoltageData.current[index],
+const timePoints = generateTimePoints(100); // 100 points = 0 to 49.5 seconds
+
+// Voltage data for Cell 1
+const cell1VoltageData = [
+  3.5741, 3.5752, 3.5751, 3.5762, 3.5759, 3.576, 3.5767, 3.5767, 3.5774, 3.5774,
+  3.578, 3.578, 3.5787, 3.5787, 3.5792, 3.5792, 3.5798, 3.5797, 3.5803, 3.5802,
+  3.5808, 3.5808, 3.5813, 3.5813, 3.5818, 3.5817, 3.5822, 3.5822, 3.5827,
+  3.5827, 3.5831, 3.5831, 3.5836, 3.5835, 3.584, 3.5839, 3.5844, 3.5843, 3.5848,
+  3.5847, 3.5851, 3.5851, 3.5856, 3.5855, 3.586, 3.5858, 3.5863, 3.5862, 3.5867,
+  3.5866, 3.587, 3.587, 3.5874, 3.5873, 3.5877, 3.5876, 3.5881, 3.588, 3.5884,
+  3.5883, 3.5887, 3.5886, 3.5891, 3.589, 3.5894, 3.5893, 3.5896, 3.5896, 3.59,
+  3.5899, 3.5903, 3.5901, 3.5906, 3.5905, 3.5909, 3.5908, 3.5912, 3.591, 3.5914,
+  3.5913, 3.5918, 3.5916, 3.592, 3.5919, 3.5923, 3.5922, 3.5926, 3.5925, 3.5929,
+  3.5927, 3.5932, 3.593, 3.5934, 3.5933, 3.5936, 3.5935, 3.5939, 3.5938, 3.5942,
+  3.594,
+];
+
+// Voltage data for Cell 2
+const cell2VoltageData = [
+  3.5741, 3.5751, 3.5751, 3.5762, 3.5759, 3.576, 3.5767, 3.5767, 3.5774, 3.5774,
+  3.578, 3.578, 3.5787, 3.5787, 3.5792, 3.5792, 3.5798, 3.5797, 3.5803, 3.5802,
+  3.5808, 3.5808, 3.5813, 3.5813, 3.5818, 3.5817, 3.5822, 3.5822, 3.5827,
+  3.5827, 3.5831, 3.5831, 3.5836, 3.5835, 3.584, 3.5839, 3.5844, 3.5843, 3.5848,
+  3.5847, 3.5851, 3.5851, 3.5856, 3.5855, 3.586, 3.5858, 3.5863, 3.5862, 3.5867,
+  3.5866, 3.587, 3.587, 3.5874, 3.5873, 3.5877, 3.5876, 3.5881, 3.588, 3.5884,
+  3.5883, 3.5887, 3.5886, 3.5891, 3.589, 3.5894, 3.5893, 3.5896, 3.5896, 3.59,
+  3.5899, 3.5903, 3.5901, 3.5906, 3.5905, 3.5909, 3.5908, 3.5912, 3.591, 3.5914,
+  3.5913, 3.5918, 3.5916, 3.592, 3.5919, 3.5923, 3.5922, 3.5926, 3.5925, 3.5929,
+  3.5927, 3.5932, 3.593, 3.5934, 3.5933, 3.5936, 3.5935, 3.5939, 3.5938, 3.5942,
+  3.594,
+];
+
+// Voltage data for Cell 3
+const cell3VoltageData = [
+  3.6663, 3.6673, 3.668, 3.6687, 3.6694, 3.6699, 3.6704, 3.671, 3.6715, 3.6718,
+  3.6723, 3.6727, 3.6731, 3.6734, 3.6739, 3.6742, 3.6746, 3.6749, 3.6753,
+  3.6756, 3.6759, 3.6762, 3.6766, 3.6769, 3.6772, 3.6775, 3.6777, 3.678, 3.6783,
+  3.6786, 3.6788, 3.6791, 3.6793, 3.6796, 3.6798, 3.6801, 3.6803, 3.6805,
+  3.6807, 3.6809, 3.6812, 3.6814, 3.6817, 3.6819, 3.6821, 3.6823, 3.6825,
+  3.6827, 3.6829, 3.6831, 3.6832, 3.6834, 3.6836, 3.6839, 3.684, 3.6842, 3.6844,
+  3.6845, 3.6847, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849,
+  3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849,
+  3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849,
+  3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849,
+  3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849, 3.6849,
+];
+
+// Voltage data for Cell 4
+const cell4VoltageData = [
+  3.5751, 3.5762, 3.5771, 3.5778, 3.5784, 3.5791, 3.5797, 3.5803, 3.5808,
+  3.5813, 3.5818, 3.5823, 3.5828, 3.5832, 3.5837, 3.5842, 3.5845, 3.585, 3.5854,
+  3.5858, 3.5862, 3.5866, 3.5869, 3.5873, 3.5877, 3.588, 3.5883, 3.5887, 3.589,
+  3.5894, 3.5897, 3.59, 3.5904, 3.5907, 3.591, 3.5913, 3.5916, 3.5919, 3.5922,
+  3.5925, 3.5927, 3.593, 3.5933, 3.5936, 3.5939, 3.5941, 3.5944, 3.5946, 3.5949,
+  3.5952, 3.5954, 3.5957, 3.5959, 3.5962, 3.5964, 3.5967, 3.5969, 3.5971,
+  3.5974, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976,
+  3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976,
+  3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976,
+  3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976,
+  3.5976, 3.5976, 3.5976, 3.5976, 3.5976, 3.5976,
+];
+
+// Voltage vs Time data for real-time plotting
+export const voltageTimeData = (() => {
+  // Create pairs of time and voltage values
+  const pairs = timePoints.map((time, index) => ({
+    time,
+    voltage:
+      cell1VoltageData[index] ||
+      cell1VoltageData[cell1VoltageData.length - 1],
   }));
 
-  // Sort the pairs by voltage (ascending order)
-  pairs.sort((a, b) => a.voltage - b.voltage);
-
-  // Extract sorted voltage and current arrays
+  // Return time and voltage arrays
   return {
+    time: pairs.map((pair) => pair.time),
     voltage: pairs.map((pair) => pair.voltage),
-    current: pairs.map((pair) => pair.current),
   };
 })();
 
@@ -135,44 +167,65 @@ export interface CellData {
 }
 
 // Helper to generate slightly different data for each cell
-const generateVariedData = (baseData: ChartDataPoint[], factor: number): ChartDataPoint[] => {
-  return baseData.map(point => ({
+const generateVariedData = (
+  baseData: ChartDataPoint[],
+  factor: number
+): ChartDataPoint[] => {
+  return baseData.map((point) => ({
     ...point,
     x: point.x * (1 + (Math.random() - 0.5) * 0.1 * factor),
     y: point.y * (1 + (Math.random() - 0.5) * 0.15 * factor),
   }));
 };
 
+// Create voltage-time data for each cell
+const createCellVoltageTimeData = (voltageData: number[]) => {
+  return timePoints.map((time, index) => ({
+    x: time, // Time on x-axis
+    y: voltageData[index] || voltageData[voltageData.length - 1], // Voltage on y-axis
+  }));
+};
+
 export const cellsData: Record<CellNumber, CellData> = {
-  1: { 
-    SoH: 83.79, RUL: 552, OCV: 4.09,
-    nyquistData: nyquistData,
+  1: {
+    SoH: 98.23,
+    RUL: 912, 
+    OCV: 3.5254,
+    nyquistData: createCellVoltageTimeData(cell1VoltageData),
     bodeMagnitudeData: bodeMagnitudeData,
-    bodePhaseData: bodePhaseData
+    bodePhaseData: bodePhaseData,
   },
-  2: { 
-    SoH: 78.45, RUL: 487, OCV: 3.98,
-    nyquistData: generateVariedData(nyquistData, 1.2),
+  2: {
+    SoH: 93.27,
+    RUL: 664,
+    OCV: 3.5245,
+    nyquistData: createCellVoltageTimeData(cell2VoltageData),
     bodeMagnitudeData: generateVariedData(bodeMagnitudeData, 1.2),
-    bodePhaseData: generateVariedData(bodePhaseData, 1.2)
+    bodePhaseData: generateVariedData(bodePhaseData, 1.2),
   },
-  3: { 
-    SoH: 92.12, RUL: 634, OCV: 4.15,
-    nyquistData: generateVariedData(nyquistData, 0.8),
+  3: {
+    SoH: 89.34,
+    RUL: 467,
+    OCV: 3.6216,
+    nyquistData: createCellVoltageTimeData(cell3VoltageData),
     bodeMagnitudeData: generateVariedData(bodeMagnitudeData, 0.8),
-    bodePhaseData: generateVariedData(bodePhaseData, 0.8)
+    bodePhaseData: generateVariedData(bodePhaseData, 0.8),
   },
-  4: { 
-    SoH: 65.33, RUL: 321, OCV: 3.87,
-    nyquistData: generateVariedData(nyquistData, 1.5),
+  4: {
+    SoH: 96.89,
+    RUL: 845,
+    OCV: 3.5263,
+    nyquistData: createCellVoltageTimeData(cell4VoltageData),
     bodeMagnitudeData: generateVariedData(bodeMagnitudeData, 1.5),
-    bodePhaseData: generateVariedData(bodePhaseData, 1.5)
+    bodePhaseData: generateVariedData(bodePhaseData, 1.5),
   },
-  5: { 
-    SoH: 88.67, RUL: 598, OCV: 4.11,
-    nyquistData: generateVariedData(nyquistData, 0.9),
-    bodeMagnitudeData: generateVariedData(bodeMagnitudeData, 0.9),
-    bodePhaseData: generateVariedData(bodePhaseData, 0.9)
+  5: {
+    SoH: 96.89,
+    RUL: 845,
+    OCV: 3.5263,
+    nyquistData: createCellVoltageTimeData(cell4VoltageData),
+    bodeMagnitudeData: generateVariedData(bodeMagnitudeData, 1.5),
+    bodePhaseData: generateVariedData(bodePhaseData, 1.5),
   },
 };
 
