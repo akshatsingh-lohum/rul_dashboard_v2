@@ -121,20 +121,63 @@ export const bodePhaseData: ChartDataPoint[] = [
   { x: 0.100074701, y: -3.74949 },
 ];
 
-// Results summary data
-export const resultsData = {
-  SoH: 83.79,
-  ocv: 4.091332,
-  RUL: 552,
-  OCV: 4.09,
-  placeholder1: 1,
-  placeholder2: 2,
-  placeholder3: 552,
-  placeholder4: 4,
-  placeholder5: 5,
-  placeholder6: 6,
-  placeholder7: 7,
+// --- Data for Multiple Cells ---
+
+export type CellNumber = 1 | 2 | 3 | 4 | 5;
+
+export interface CellData {
+  SoH: number;
+  RUL: number;
+  OCV: number;
+  nyquistData: ChartDataPoint[];
+  bodeMagnitudeData: ChartDataPoint[];
+  bodePhaseData: ChartDataPoint[];
+}
+
+// Helper to generate slightly different data for each cell
+const generateVariedData = (baseData: ChartDataPoint[], factor: number): ChartDataPoint[] => {
+  return baseData.map(point => ({
+    ...point,
+    x: point.x * (1 + (Math.random() - 0.5) * 0.1 * factor),
+    y: point.y * (1 + (Math.random() - 0.5) * 0.15 * factor),
+  }));
 };
+
+export const cellsData: Record<CellNumber, CellData> = {
+  1: { 
+    SoH: 83.79, RUL: 552, OCV: 4.09,
+    nyquistData: nyquistData,
+    bodeMagnitudeData: bodeMagnitudeData,
+    bodePhaseData: bodePhaseData
+  },
+  2: { 
+    SoH: 78.45, RUL: 487, OCV: 3.98,
+    nyquistData: generateVariedData(nyquistData, 1.2),
+    bodeMagnitudeData: generateVariedData(bodeMagnitudeData, 1.2),
+    bodePhaseData: generateVariedData(bodePhaseData, 1.2)
+  },
+  3: { 
+    SoH: 92.12, RUL: 634, OCV: 4.15,
+    nyquistData: generateVariedData(nyquistData, 0.8),
+    bodeMagnitudeData: generateVariedData(bodeMagnitudeData, 0.8),
+    bodePhaseData: generateVariedData(bodePhaseData, 0.8)
+  },
+  4: { 
+    SoH: 65.33, RUL: 321, OCV: 3.87,
+    nyquistData: generateVariedData(nyquistData, 1.5),
+    bodeMagnitudeData: generateVariedData(bodeMagnitudeData, 1.5),
+    bodePhaseData: generateVariedData(bodePhaseData, 1.5)
+  },
+  5: { 
+    SoH: 88.67, RUL: 598, OCV: 4.11,
+    nyquistData: generateVariedData(nyquistData, 0.9),
+    bodeMagnitudeData: generateVariedData(bodeMagnitudeData, 0.9),
+    bodePhaseData: generateVariedData(bodePhaseData, 0.9)
+  },
+};
+
+// Legacy resultsData for compatibility, can be removed later
+export const resultsData = cellsData[1];
 
 // Legacy data (keeping for compatibility)
 export const lineChartData1: ChartDataPoint[] = nyquistData;

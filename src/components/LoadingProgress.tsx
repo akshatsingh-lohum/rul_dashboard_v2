@@ -15,7 +15,7 @@ const LoadingProgress: React.FC<LoadingProgressProps> = ({ onComplete }) => {
           setTimeout(onComplete, 200);
           return 100;
         }
-        return prev + 25; // 4 steps to complete in 2 seconds (500ms each)
+        return prev + 10; // 10 steps to complete in 5 seconds (500ms each)
       });
     }, 500);
 
