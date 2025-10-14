@@ -23,7 +23,7 @@ const generateTimePoints = (count: number): number[] => {
   return result;
 };
 
-const timePoints = generateTimePoints(100); // 100 points = 0 to 49.5 seconds
+const timePoints = generateTimePoints(60); // 100 points = 0 to 49.5 seconds
 
 // Voltage data for Cell 1
 const cell1VoltageData = [
@@ -92,23 +92,26 @@ export const voltageTimeData = (() => {
     cell1VoltageData,
     cell2VoltageData,
     cell3VoltageData,
-    cell4VoltageData
+    cell4VoltageData,
   ];
-  
+
   // Get a random index between 0 and 3
   const randomIndex = Math.floor(Math.random() * 4);
-  
+
   // Select the random cell data
   const selectedCellData = cellDatasets[randomIndex];
-  
-  console.log(`[DEBUG] Randomly selected Cell ${randomIndex + 1} data for voltage-time chart`);
-  
+
+  console.log(
+    `[DEBUG] Randomly selected Cell ${
+      randomIndex + 1
+    } data for voltage-time chart`
+  );
+
   // Create pairs of time and voltage values
   const pairs = timePoints.map((time, index) => ({
     time,
     voltage:
-      selectedCellData[index] ||
-      selectedCellData[selectedCellData.length - 1],
+      selectedCellData[index] || selectedCellData[selectedCellData.length - 1],
   }));
 
   // Return time and voltage arrays
