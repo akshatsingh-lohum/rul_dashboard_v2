@@ -176,18 +176,36 @@ const VoltageTimeChart: React.FC<VoltageTimeChartProps> = ({ onComplete }) => {
             domain={[timeMin - timePadding, timeMax + timePadding]}
             axisLine={true}
             tickLine={true}
-            tick={{ fontSize: 20, fontWeight: 500 }}
+            tick={false}
             tickFormatter={(value) => Number(value).toFixed(1)}
-           
+            label={{
+              value: "Time (s)",
+              position: "insideBottom",
+              offset: -25,
+              style: {
+                fontSize: "22px",
+                fontWeight: "bold",
+                textAnchor: "middle",
+              },
+            }}
           />
           <YAxis
             type="number"
             domain={[voltageMin - voltagePadding, voltageMax + voltagePadding]}
             axisLine={true}
             tickLine={true}
-            tick={{ fontSize: 20, fontWeight: 500 }}
-            tickFormatter={(value) => Number(value).toFixed(3)}
-
+            tick={false}
+            label={{
+              value: "Voltage (V)",
+              angle: -90,
+              position: "insideLeft",
+              offset: -45,
+              style: {
+                fontSize: "22px",
+                fontWeight: "bold",
+                textAnchor: "middle",
+              },
+            }}
           />
           <Tooltip
             formatter={(value) => [Number(value).toFixed(3), "Voltage (V)"]}
